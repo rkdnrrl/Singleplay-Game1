@@ -6,14 +6,20 @@ const PORT = process.env.PORT || 3002;
 
 const app = express();
 
-// 클라이언트에 플랫폼 API 주소 노출
+// config.js — 항상 최신값 (캐시 금지)
 app.get('/config.js', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
   res.type('application/javascript');
   res.send(`window.__ALP_PLATFORM_API__ = ${JSON.stringify(PLATFORM_API_URL)};`);
 });
 
-// 정적 파일 서빙
-app.use(express.static(__dirname, { index: 'index.html' }));
+// 정적 파일 — 항상 서버에 재검증 (배포 즉시 반영)
+app.use(express.static(__dirname, {
+  index: 'index.html',
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'no-cache');
+  },
+}));
 
 app.listen(PORT, () => {
   console.log(`Rock-Clicker server running on port ${PORT}`);
